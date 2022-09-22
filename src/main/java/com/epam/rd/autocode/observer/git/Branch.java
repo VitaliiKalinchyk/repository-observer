@@ -1,14 +1,34 @@
 package com.epam.rd.autocode.observer.git;
 
-import java.util.Objects;
+import java.util.*;
 
 public class Branch {
 
     private final String name;
 
+    private final ArrayList<Commit> commits = new ArrayList<>();
+
     public Branch(final String name) {
         Objects.requireNonNull(name);
         this.name = name;
+    }
+
+    public Branch(final String name, ArrayList<Commit> commits) {
+        Objects.requireNonNull(name);
+        this.name = name;
+        this.commits.addAll(commits);
+    }
+
+    public ArrayList<Commit> getCommits() {
+        return commits;
+    }
+
+    public void addCommit(Commit commit) {
+        commits.add(commit);
+    }
+
+    public void addAllCommits(ArrayList<Commit> commits) {
+        this.commits.addAll(commits);
     }
 
     @Override
