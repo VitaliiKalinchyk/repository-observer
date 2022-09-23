@@ -3,8 +3,8 @@ package com.epam.rd.autocode.observer.git;
 import java.util.*;
 
 public class SimpleRepository implements Repository {
-    private final Map<String, Branch> branches = new LinkedHashMap<>(){{
-        put("main", new Branch("main"));
+    private final Map<Branch, ArrayList<Commit>> branches = new LinkedHashMap<>(){{
+        put(new Branch("main"), new ArrayList<>());
     }};
 
     List<WebHook> commitHooks = new ArrayList<>();
@@ -13,24 +13,28 @@ public class SimpleRepository implements Repository {
 
     @Override
     public Branch getBranch(String name) {
-        return branches.get(name);
+        Branch currentBranch = new Branch(name);
+        if (branches.containsKey(currentBranch))
+            return currentBranch;
+        return null;
     }
 
     @Override
     public Branch newBranch(Branch sourceBranch, String name) {
-        if (branches.containsKey(name) || !branches.containsValue(sourceBranch)){
+        Branch newBranch = new Branch(name);
+        if (branches.containsKey(newBranch) || !branches.containsKey(sourceBranch)){
             throw new IllegalArgumentException();
         }
-        Branch newBranch = new Branch(name, sourceBranch.getCommits());
-        branches.put(name, newBranch);
+        branches.put(newBranch, new ArrayList<>());
+        branches.get(newBranch).addAll(branches.get(sourceBranch));
         return newBranch;
     }
 
     @Override
     public Commit commit(Branch branch, String author, String[] changes) {
         Commit newCommit = new Commit(author, changes);
-        if (!branch.getCommits().contains(newCommit)) {
-            branch.addCommit(newCommit);
+        if (!branches.get(branch).contains(newCommit)) {
+            branches.get(branch).add(newCommit);
             for (WebHook webHook : commitHooks) {
                 if (webHook.branch().equals(branch.toString()))
                     webHook.onEvent(new Event(Event.Type.COMMIT, branch, new ArrayList<>() {{
@@ -44,8 +48,8 @@ public class SimpleRepository implements Repository {
     @Override
     public void merge(Branch sourceBranch, Branch targetBranch) {
         ArrayList<Commit> newCommits = new ArrayList<>();
-        for (Commit commit : sourceBranch.getCommits()) {
-            if (!targetBranch.getCommits().contains(commit)){
+        for (Commit commit : branches.get(sourceBranch)) {
+            if (!branches.get(targetBranch).contains(commit)){
                 newCommits.add(commit);
             }
         }
@@ -54,7 +58,7 @@ public class SimpleRepository implements Repository {
                 if (webHook.branch().equals(targetBranch.toString()))
                     webHook.onEvent(new Event(Event.Type.MERGE, targetBranch, newCommits));
             }
-            targetBranch.addAllCommits(newCommits);
+            branches.get(targetBranch).addAll(newCommits);
         }
     }
 
