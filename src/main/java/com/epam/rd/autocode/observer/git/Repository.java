@@ -8,4 +8,6 @@ public interface Repository {
     void merge(Branch sourceBranch, Branch targetBranch);
 
     void addWebHook(WebHook webHook);
+
+    void removeWebHook(WebHook webHook);
 }

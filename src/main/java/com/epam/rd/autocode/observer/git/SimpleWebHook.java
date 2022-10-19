@@ -1,19 +1,18 @@
 package com.epam.rd.autocode.observer.git;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class SimpleWebHook implements WebHook {
 
     private final Branch branch;
 
-    private final Event event;
+    private final Event.Type eventType;
 
     private final List<Event> caughtEvents = new ArrayList<>();
 
-    public SimpleWebHook(Branch branch, Event event) {
-        this.branch = branch;
-        this.event = event;
+    public SimpleWebHook(String branchName, Event.Type eventType) {
+        this.branch = new Branch(branchName);
+        this.eventType = eventType;
     }
 
     @Override
@@ -23,7 +22,7 @@ public class SimpleWebHook implements WebHook {
 
     @Override
     public Event.Type type() {
-        return event.type();
+        return eventType;
     }
 
     @Override

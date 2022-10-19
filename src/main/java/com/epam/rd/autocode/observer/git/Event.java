@@ -1,9 +1,6 @@
 package com.epam.rd.autocode.observer.git;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.StringJoiner;
+import java.util.*;
 
 public class Event {
     private final Type type;
